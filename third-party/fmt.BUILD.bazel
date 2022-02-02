@@ -1,0 +1,13 @@
+"Bazel build file for libfmt"
+
+cc_library(
+    name = "fmt",
+    srcs = ["src/format.cc"],
+    hdrs = glob(["include/**/*.h"]),
+    includes = ["include"],
+    copts = [
+        "-std=c++2a",
+        "-w",
+    ],
+    visibility = ["//visibility:public"],
+)
