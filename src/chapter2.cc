@@ -1,4 +1,5 @@
 #include "testing.h"
+
 int multiply(int n, int a) {
     if (n == 1)
         return a;

@@ -5,12 +5,18 @@ CC_FLAGS = [
     "-Wunused-value",
 ]
 
+cc_library(
+    name = "minitest",
+    hdrs = ["testing.h"],
+)
+
 
 cc_binary(
     name = "chapter2",
-    srcs = ["chapter2.cc", "testing.h"],
+    srcs = ["chapter2.cc"],
     copts = CC_FLAGS,
     deps = [
         "@fmt",
+        "minitest"
     ],
 )
