@@ -20,3 +20,14 @@ cc_binary(
         "minitest"
     ],
 )
+
+
+cc_binary(
+    name = "chapter3",
+    srcs = ["chapter3.cc"],
+    copts = CC_FLAGS,
+    deps = [
+        "@fmt",
+        "minitest"
+    ],
+)
