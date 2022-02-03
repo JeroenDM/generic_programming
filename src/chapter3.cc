@@ -1,12 +1,15 @@
+#include <algorithm>
 #include <cmath>
 #include <concepts>
 #include <iterator>
-#include <vector>
+#include <string>
 #include <type_traits>
+#include <vector>
 
 #include "fmt/color.h"
 #include "fmt/core.h"
 #include "fmt/format.h"
+#include "timeit.h"
 
 #define RandomAccessIterator std::random_access_iterator
 #define Integer std::integral
@@ -20,17 +23,16 @@ std::make_signed<Int>::type make_signed(Int i) {
     return static_cast<std::make_signed<Int>::type>(i);
 }
 
-
 /** Mark numbers that can be divided by the factor with false.
- * 
+ *
  * # Preconditions
- * 
+ *
  * First points to the index of the first value that needs to be checked.
  * This could be the index of  twice the factor:
  *     first = i + 2 * i + 3
  * but for efficiency it is the first occurrence of factor^2
  *     first = 2 * i^2 + 6 * i + 3.
- * 
+ *
  * **/
 // Assume first points the first value we need to check.
 template <RandomAccessIterator Iter, Integer Int>
@@ -72,6 +74,51 @@ void print_primes(const std::vector<bool>& sieve) {
     fmt::print("\n");
 }
 
+/** Exercise 3.2 **/
+void benchmark() {
+    fmt::print("\n--- Exercise 3.2 ---\n\n");
+    static constexpr int NUM_RUNS{5000};
+    std::vector<bool> sieve(60000);
+
+    uint16_t n16{1000};
+    uint32_t n32{1000};
+    uint64_t n64{1000};
+
+    double t1 = time_it([&]() { mark_sieve(sieve.begin(), n16); }, NUM_RUNS);
+    fmt::print("time {:.6f} ms\n", t1 * 1000);
+
+    double t2 = time_it([&]() { mark_sieve(sieve.begin(), n32); }, NUM_RUNS);
+    fmt::print("time {:.6f} ms\n", t2 * 1000);
+
+    double t3 = time_it([&]() { mark_sieve(sieve.begin(), n64); }, NUM_RUNS);
+    fmt::print("time {:.6f} ms\n", t3 * 1000);
+}
+
+/** Exercise 3.3 **/
+int count_primes(int n) {
+    std::vector<bool> sieve(n);
+    mark_sieve(sieve.begin(), sieve.size());
+    return std::ranges::count(sieve, true);
+}
+
+void plot_line(const std::vector<int>& v) {
+    static constexpr double TERMINAL_WIDTH = 80;
+    int y_max = std::ranges::max(v);
+    for (const auto& y : v) {
+        int scaled = (int) ((double) y / (double) y_max) * TERMINAL_WIDTH;
+        fmt::print("({}) |{}\n", y, std::string(y, '#'));
+    }
+}
+
+void prime_function_plot() {
+    fmt::print("\n--- Exercise 3.3 ---\n\n");
+    auto generator = [n{0}]() mutable { return count_primes(++n); };
+
+    std::vector<int> values(200);
+    std::ranges::generate(values, generator);
+    plot_line(values);
+}
+
 int main() {
     constexpr size_t N = 53;
     std::vector s((N - 3) / 2, true);
@@ -93,4 +140,7 @@ int main() {
 
     mark_sieve(s.begin(), s.size());
     print_primes(s);
+
+    // benchmark();
+    // prime_function_plot();
 }

@@ -24,7 +24,7 @@ cc_binary(
 
 cc_binary(
     name = "chapter3",
-    srcs = ["chapter3.cc"],
+    srcs = ["chapter3.cc", "timeit.h"],
     copts = CC_FLAGS,
     deps = [
         "@fmt",
