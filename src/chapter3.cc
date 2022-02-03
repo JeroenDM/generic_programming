@@ -2,6 +2,7 @@
 #include <concepts>
 #include <iterator>
 #include <vector>
+#include <type_traits>
 
 #include "fmt/color.h"
 #include "fmt/core.h"
@@ -24,25 +25,42 @@ inline int sqrt_floor(int x) {
 #define RandomAccessIterator std::random_access_iterator
 #define Integer std::integral
 
+
+template <Integer Int>
+std::make_signed<Int>::type make_signed(Int i) {
+    return static_cast<std::make_signed<Int>::type>(i);
+}
+
+
 // Assume first points the first value we need to check.
-template <RandomAccessIterator I, Integer N>
-void mark_sieve_one(I first, I last, N factor) {
-    fmt::print("factor: {}\n", factor);
+template <RandomAccessIterator Iter, Integer Int>
+void mark_sieve_one(Iter first, Iter last, Int factor) {
+    // fmt::print("factor: {}\n", factor);
     do {
         *first = false;
         first = first + factor;
-    } while (std::distance(first, last) > factor);
+    } while (last - first > make_signed<Int>(factor));
+    // std distance has linear time complexity for random access iterator!! ?
 }
 
 template <RandomAccessIterator I, Integer N>
 void mark_sieve(I first, N n) {
-    std::fill_n(first, n, true);
-    int i_max = (sqrt_floor(n) - 3) / 2;
-    for (int i = 0; i <= i_max; ++i) {
-        int two_i = i + i;
-        int factor = two_i + 3;
-        int offset = two_i * (i + 3) + 3;
-        mark_sieve_one(first + offset, first + n, factor);
+    I last = first + n;
+    std::fill(first, last, true);
+    N i{0};
+    N offset{3};
+    // ISSUE: if I make this a size_t type, I get a segfault ???
+    // Related to the singed - unsigned comparison above with std::distance.
+    // Also for n=53, not for n = 200
+    N factor{3};
+    while (offset < n) {
+        // fmt::print("i = {} factor = {} offset = {}\n", i, factor, offset);
+        if (first[i]) {
+            mark_sieve_one(first + offset, last, factor);
+        }
+        i = i + 1;
+        offset = 2 * i * (i + 3) + 3;
+        factor = 2 * i + 3;
     }
 }
 
@@ -71,7 +89,7 @@ void mark_sieve(I first, N n) {
 void print_primes(const std::vector<bool>& sieve) {
     for (size_t i = 0; i < sieve.size(); ++i) {
         int n = 3 + 2 * i;
-        auto color = fmt::color::red;
+        auto color = fmt::color::dark_red;
         if (sieve[i] == true) color = fmt::color::green;
         fmt::print(fg(color), "{}, ", n);
     }
@@ -81,9 +99,10 @@ void print_primes(const std::vector<bool>& sieve) {
 int main() {
     constexpr size_t N = 53;
     std::vector s((N - 3) / 2, true);
+    fmt::print("vector size: {}\n", s.size());
 
     int i = 0;
-    auto i_offset = [](int i) {return 2 * i * i + 6 * i + 3;};
+    auto i_offset = [](int i) { return 2 * i * i + 6 * i + 3; };
     mark_sieve_one(s.begin() + i_offset(i), s.end(), 3);
     print_primes(s);
 
@@ -97,6 +116,6 @@ int main() {
     mark_sieve_one(s.begin() + i_offset(i), s.end(), 7);
     print_primes(s);
 
-    mark_sieve(s.begin(), N);
+    mark_sieve(s.begin(), s.size());
     print_primes(s);
 }
