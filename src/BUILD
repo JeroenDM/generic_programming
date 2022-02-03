@@ -28,6 +28,5 @@ cc_binary(
     copts = CC_FLAGS,
     deps = [
         "@fmt",
-        "minitest"
     ],
 )
