@@ -30,3 +30,13 @@ cc_binary(
         "@fmt",
     ],
 )
+
+cc_binary(
+    name = "chapter4",
+    srcs = ["chapter4.cc", "timeit.h"],
+    copts = CC_FLAGS,
+    deps = [
+        "@fmt",
+        "minitest",
+    ],
+)
